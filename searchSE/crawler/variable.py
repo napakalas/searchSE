@@ -47,6 +47,11 @@ class Variables(PmrCollection):
     def getInit(self, id):
         return self.data[id]['init']
 
+    def getRate(self, id):
+        if self.getType(id) == 'state':
+            return self.data[id]['rate']
+        return None
+
     def setUnit(self, id, unitId):
         if unitId != None:
             self.data[id]['unit'] = unitId
@@ -104,3 +109,6 @@ class Variables(PmrCollection):
                 self.data[id]['plot'] += [plotId]
         else:
             self.data[id]['plot'] = [plotId]
+
+    def setRate(self, id, rate):
+        self.data[id]['rate'] = rate

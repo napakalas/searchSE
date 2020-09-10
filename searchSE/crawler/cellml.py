@@ -4,6 +4,7 @@ from .unit import Units
 from .component import Components
 from .image import Images
 import copy
+import opencor as oc
 
 class Cellmls(PmrCollection):
     def __init__(self, sysWks, sysSedmls, sysVars, sysMath, *paths):
@@ -28,10 +29,10 @@ class Cellmls(PmrCollection):
             # only update files in workspaces with validating status
             if w['status'] == self.sysWks.getStatus()['validating']:
                 w['status'] == self.sysWks.getStatus()['current']
-                wksDir = os.path.join(CURRENT_PATH, WORSPACE_DIR, w['workingDir'])
+                wksDir = os.path.join(CURRENT_PATH, WORKSPACE_DIR, w['workingDir'])
                 #exclude imported folder to be extracted (from subModels)
                 excludeDirs = list(os.path.join(wksDir,p) for p in w['subModels'].keys())
-                allFiles = [file for file in getAllFilesInDir(WORSPACE_DIR, w['workingDir'])
+                allFiles = [file for file in getAllFilesInDir(WORKSPACE_DIR, w['workingDir'])
                     if all(not file.startswith(exclude) for exclude in excludeDirs) and
                     any(file.endswith(ext) for ext in fileTypes)]
                 for file in allFiles:
@@ -56,17 +57,20 @@ class Cellmls(PmrCollection):
     def validate(self):
         counter = 1
         for k, v in self.data.items():
-            counter+=1
-            print(counter, end=' ')
-            path = os.path.join(CURRENT_PATH, WORKSPACE_DIR, v['workingDir'],v['cellml'])
-            # print(path)
-            isValid, issues = self.__isValid(path)
-            if not isValid:
-                v['status'] = self.statusC['invalid']
-            for i in range(len(issues)):
-                if issues[i].startswith('Error: the imports could not be fully instantiated'):
-                    issues[i] = re.sub(os.path.join(CURRENT_PATH, WORKSPACE_DIR, v['workingDir'])+'/','',issues[i])
-            v['issues'] = issues
+            if v['status'] in [self.statusC['validating'], self.statusC['invalid']]:
+                counter+=1
+                print(counter, end=' ')
+                path = os.path.join(CURRENT_PATH, WORKSPACE_DIR, v['workingDir'],v['cellml'])
+                # print(path)
+                isValid, issues = self.__isValid(path)
+                if not isValid:
+                    v['status'] = self.statusC['invalid']
+                else:
+                    v['status'] = self.statusC['validating']
+                for i in range(len(issues)):
+                    if issues[i].startswith('Error: the imports could not be fully instantiated'):
+                        issues[i] = re.sub(os.path.join(CURRENT_PATH, WORKSPACE_DIR, v['workingDir'])+'/','',issues[i])
+                v['issues'] = issues
         self.dumpJson()
 
     def __isValid(self, path):
@@ -311,14 +315,32 @@ class Cellmls(PmrCollection):
         for compId in cellml['components']:
             compName = self.sysComps.getName(compId)
             element = root.xpath("//ns:component[@name='"+compName+"']",namespaces={'ns':root.nsmap[None]})[0]
+            compVarState = {}
             for varId in self.sysComps.getVariables(compId):
                 # get and set the units of variable
                 self.sysVars.setUnit(varId, self.__getVariableUnit(cellml, varId, element))
                 self.__setVarMathAndDependencies(cellml, varId, element)
-
+                # get and set rdf metadata
                 varName = self.sysVars.getName(varId,short=True)
-                varElement = element.xpath("//ns:variable[@name='"+varName+"']",namespaces={'ns':root.nsmap[None]})[0]
-                self.__setMetaFromElement(varElement, cellml, varId)
+                # metadata is just for variables algebraic, constants, and state
+                if self.sysVars.getType(varId) != 'rate':
+                    varElement = element.xpath("//ns:variable[@name='"+varName+"']",namespaces={'ns':root.nsmap[None]})[0]
+                    self.__setMetaFromElement(varElement, cellml, varId)
+
+                # to record rate into state
+                if self.sysVars.getType(varId) == 'state':
+                    if compId+varName not in compVarState:
+                        compVarState[compId+varName] = {'id':varId}
+                    else:
+                        compVarState[compId+varName]['id']=varId
+                elif self.sysVars.getType(varId) == 'rate':
+                    if compId+varName not in compVarState:
+                        compVarState[compId+varName] = {'rate':self.sysVars.getInit(varId)}
+                    else:
+                        compVarState[compId+varName]['rate']=self.sysVars.getInit(varId)
+            # add rate information into variables
+            for k,v in compVarState.items():
+                self.sysVars.setRate(v['id'],v['rate'])
 
             self.sysComps.setCellml(compId, cellml['id'])
             self.__setMetaFromElement(element, cellml, compId)
@@ -643,6 +665,14 @@ class Cellmls(PmrCollection):
         if url != None:
             if url in self.data:
                 return self.data[url]['id']
+        return None
+
+    def getPath(self, url=None, id=None):
+        if id != None:
+            url = self.getUrl(id=id)
+        if url != None:
+            if url in self.data:
+                return os.path.join(self.data[url]['workingDir'], self.data[url]['cellml'])
         return None
 
     def addSedml(self, id, sedmlId):

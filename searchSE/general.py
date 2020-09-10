@@ -7,8 +7,6 @@ import gzip
 import io
 import git
 from git import Repo
-from pydriller import RepositoryMining
-import opencor as oc
 import gc
 from tellurium.utils import omex
 import pandas as pd
@@ -26,7 +24,7 @@ from nltk import pos_tag, regexp_tokenize
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))  # use this on real python
 # CURRENT_PATH = os.path.abspath('')#use this on jupyter
 PMR_SERVER = 'https://models.physiomeproject.org/'
-WORSPACE_DIR = 'workspaces'
+WORKSPACE_DIR = 'workspaces'
 INDEX_DIR = 'index'
 RESOURCE_DIR = 'resources'
 ONTOLOGY_DIR = 'ontologies'

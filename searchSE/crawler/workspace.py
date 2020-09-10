@@ -5,7 +5,7 @@ class Workspaces(PmrCollection):
     def __init__(self, *paths):
         super().__init__(*paths)
         self.statusC = {'deprecated': 0, 'current': 1, 'validating': 2}
-        self.allWksDir = os.path.join(CURRENT_PATH,WORSPACE_DIR)
+        self.allWksDir = os.path.join(CURRENT_PATH,WORKSPACE_DIR)
 
     def update(self):
         # get or update workspaces
@@ -118,7 +118,7 @@ class Workspaces(PmrCollection):
 
     def __updateRdf(self):
         graph = rdflib.Graph()
-        rdfPaths = getAllFilesInDir(WORSPACE_DIR)
+        rdfPaths = getAllFilesInDir(WORKSPACE_DIR)
         for rdfPath in rdfPaths:
             if rdfPath.endswith('.rdf'):
                 try:
@@ -154,3 +154,11 @@ class Workspaces(PmrCollection):
         for cellmlId, data in sysCellmls.getData().items():
             self.addCellml(url=data['workspace'],cellmlId=data['id'])
         self.dumpJson()
+
+    def getExposures(self, id=None, url=None):
+        if id != None:
+            url = self.getUrl(id)
+        if url in self.data:
+            if 'exposures' in self.data[url]:
+                return self.data[url]['exposures']
+        return {}

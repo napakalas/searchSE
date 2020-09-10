@@ -7,8 +7,13 @@ from ..crawler.variable import Variables
 from ..crawler.cellml import Cellmls
 from ..crawler.equation import Maths
 
+from .clusterer import CellmlClusterer
+
 import os
 import pandas as pd
+
+RS_CLUSTERER = 'cellmlClusterer'
+RS_ONTOLOGY = 'ontoDf.gz'
 
 class Indexer:
     FEATURE_DOCUMENT = 0
@@ -26,10 +31,16 @@ class Indexer:
         """load all required data"""
         self.__loadData()
 
+        """create clusterer file """
+        self.__createClusterer()
+
+        """(soon will be modified so Indexer will be an independent object,
+           do not load ontologies other data and cluster)"""
+
     def createIndexVariable(self, destFile, lower=False, stem=None, lemma=False):
         self.invIdxVar = {}
-        self.metaVar = {'general':{'totalTerms':0, 'totalData':len(self.vars)}, 'data':{}}
-        for varId, value in self.vars.items():
+        self.metaVar = {'general':{'totalTerms':0, 'totalData':len(self.vars['data'])}, 'data':{}}
+        for varId, value in self.vars['data'].items():
             text = ''
             """index from RDF"""
             # try:
@@ -37,15 +48,15 @@ class Indexer:
                 for leaf in value['rdfLeaves']:
                     leaf = str(leaf).strip()
                     if leaf.startswith('http://'):
-                        text += self.__getOntoClassText(leaf)
+                        text += self.__getOntoClassText(leaf) + ' '
                     elif leaf.startswith('file://'):
                         pass
                     else:
-                        text += leaf
+                        text += leaf + ' '
             # modify text to multiple setting and get tokens
-            tokens = self.__getTokens(text, lower=lower, stem=stem, lemma=lemma)
+            tokens = getTokens(text, lower=lower, stem=stem, lemma=lemma)
             self.__generateTermsIndex(varId, tokens)
-
+            self.settings = {'lower':lower, 'stem':stem, 'lemma':lemma}
             # save variable local and general metadata
             self.metaVar['data'][varId] = {'len':len(tokens)}
             self.metaVar['general']['totalTerms'] += len(tokens)
@@ -73,10 +84,6 @@ class Indexer:
         idPart = idPart.replace('_',':')
         if len(idPart.split(':')) >= 2:
             return idPart
-
-    def __getTokens(self, text, **settings):
-        self.settings = settings
-        return getTokens(text, **settings)
 
     def __generateTermsIndex(self, varId, tokens):
         for token in tokens:
@@ -112,15 +119,12 @@ class Indexer:
     def buildMap(self):
         pass
 
-    def close(self):
-        self.__closeOntologies()
-
     def __loadOntologies(self):
         print('Loading ontologies ...')
         listData, dfCsv = [], pd.DataFrame()
         allFiles = getAllFilesInDir(ONTOLOGY_DIR)
         if any('ontoDf.gz' in file for file in allFiles):
-            self.ontologies = loadPickle(ONTOLOGY_DIR,'ontoDf.gz')
+            self.ontologies = loadPickle(ONTOLOGY_DIR,RS_ONTOLOGY)
             self.ontoName = {idx.split(':')[0] for idx in self.ontologies.index if idx[0].isupper() and ':' in idx}
             return
         for ontoFile in allFiles:
@@ -167,14 +171,23 @@ class Indexer:
         df = df.set_index('id')
         df = df.append(dfCsv, sort=False)
         df = df.groupby(df.index).first() # delete duplicate
-        dumpPickle(df,ONTOLOGY_DIR,'ontoDf.gz')
+        dumpPickle(df, ONTOLOGY_DIR, RS_ONTOLOGY)
         self.ontologies = df
         self.ontoName = {idx.split(':')[0] for idx in df.index if idx[0].isupper() and ':' in idx}
 
     def __loadData(self):
         print('Loading required data, e.g. cellml, sedml, variable, workspaces, etc ... ')
-        self.vars = loadJson(RESOURCE_DIR, RS_VARIABLE)['data']
-        self.cellmls = loadJson(RESOURCE_DIR, RS_CELLML)['data']
+        self.vars = loadJson(RESOURCE_DIR, RS_VARIABLE)
+        self.cellmls = loadJson(RESOURCE_DIR, RS_CELLML)
+
+    def __createClusterer(self):
+        print('Create clusterer with XPath and structur features using HDBSCAN')
+        if not os.path.exists(os.path.join(CURRENT_PATH, RESOURCE_DIR, RS_CLUSTERER)):
+            clusterer = CellmlClusterer(cellmls=self.cellmls)
+            dumpPickle(clusterer, RESOURCE_DIR, RS_CLUSTERER)
+
+    def close(self):
+        self.__closeOntologies()
 
     def __closeOntologies(self):
         del self.ontologies

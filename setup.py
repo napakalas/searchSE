@@ -11,8 +11,10 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/napakalas/searchSE",
-    packages=setuptools.find_packages('src'),
-    package_dir={'': 'src'},
+    packages=setuptools.find_packages(),
+    # packages=setuptools.find_namespace_packages(include=['searchSE.*']),
+    # namespace_packages=['searchSE'],
+    # package_dir={'': 'searchSE'},
     install_requires=[
         'matplotlib',
         'lxml',
@@ -24,6 +26,9 @@ setuptools.setup(
         'rdflib',
         'xmltodict',
         'urllib3',
+        'beautifulsoup4',
+        'sklearn',
+        'hdbscan',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",

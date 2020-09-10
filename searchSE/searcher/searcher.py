@@ -9,9 +9,10 @@ from ..crawler.workspace import Workspaces
 from ..crawler.component import Components
 from ..crawler.image import Images
 
+from ..indexer.indexer import RS_CLUSTERER
 
 class Searcher:
-    def __init__(self, algorithm = ALG_BM25, idxVarFile='invIdxVar-obo-low'):
+    def __init__(self, algorithm=ALG_BM25, idxVarFile='invIdxVar-obo-lemma-low'):
         """Initialise ...
 
         Parameters
@@ -37,6 +38,8 @@ class Searcher:
 
         self.idxVar = IndexVariable(idxVarFile)
 
+        self.clusterer = loadPickle(RESOURCE_DIR, RS_CLUSTERER)
+
         self.sysUnits = Units(RESOURCE_DIR, RS_UNIT)
         self.sysMaths = Maths(RESOURCE_DIR, RS_MATH)
         self.sysSedmls = Sedmls(RESOURCE_DIR, RS_SEDML)
@@ -54,7 +57,7 @@ class Searcher:
         # temporarily just variable search :)
         # the sedml search temporarily is modified variable search
 
-        return self.__sedmlSearch(query, top)
+        return self.__searchSedmls(query, top)
 
         # return self.__getVariables(query, top)
 
@@ -63,35 +66,69 @@ class Searcher:
 
         for varId in resultVars:
             varData = {}
+            # get main information
             varData['name'] = self.sysVars.getName(varId)
             varData['init'] = self.sysVars.getInit(varId)
             varData['type'] = self.sysVars.getType(varId)
+            if varData['type'] == 'state':
+                varData['rate'] = self.sysVars.getRate(varId)
+            # get units
             varUnit = self.sysVars.getUnit(varId)
             varData['unit'] = {'name': self.sysUnits.getNames(varUnit)[0], 'text':self.sysUnits.getText(varUnit)}
+            # get math
             varData['math'] = self.sysVars.getMaths(varId)
+            # get maths' dependents
             varData['dependent'] = {}
             self.sysVars.getDependents(varId, varDep=varData['dependent'])
+            # get leaves
             varData['rdfLeaves'] = self.sysVars.getObjLeaves(varId)
+            # get sedmls and plot
             varData['plot'] = [os.path.join(CURRENT_PATH, RESOURCE_DIR, SEDML_IMG_DIR, plot+IMG_EXT) for plot in self.sysVars.getPlots(varId)]
             varData['sedml'] = [os.path.join(PMR_SERVER, self.sysSedmls.getUrl(plot.split('.')[0])) for plot in self.sysVars.getPlots(varId)]
+            #get components
             varData['component'] = self.sysComps.getName(self.sysVars.getCompId(varId))
             varData['compLeaves'] = self.sysComps.getObjLeaves(self.sysVars.getCompId(varId))
-
+            # get cellml, workspace, images
             cellmlId = self.sysComps.getCellml(self.sysVars.getCompId(varId))
             varData['cellmlUrl'] = PMR_SERVER + self.sysCellmls.getUrl(id=cellmlId)
             varData['cellmlCaption'] = self.sysCellmls.getCaption(id=cellmlId)
-            varData['cellmlImages'] = {varData['cellmlUrl'][:varData['cellmlUrl'].rfind('/')+1]+self.sysImages.getPath(id):self.sysImages.getTitle(id) for id in self.sysCellmls.getImages(id=cellmlId)}
+            # varData['cellmlImages'] = [varData['cellmlUrl'][:varData['cellmlUrl'].rfind('/')+1]+self.sysImages.getPath(id) for id in self.sysCellmls.getImages(id=cellmlId)]
             varData['workspaceUrl'] = PMR_SERVER + self.sysCellmls.getWorkspace(id=cellmlId)
+
+            # get exposures
+            exposures = self.sysWks.getExposures(url=self.sysCellmls.getWorkspace(id=cellmlId))
+            varData['exposures'] = [PMR_SERVER + exposure for exposure in exposures.keys()]
+            # get similar cellml using cluster
+            similarCellmls = self.clusterer.getSimCellmlsByCluster(self.sysCellmls.getUrl(id=cellmlId)).keys()
+            varData['similarCellmls'] = [PMR_SERVER + url for url in similarCellmls]
+
+            # get cellml images
+            cellmlImages = []
+            for imageId in self.sysCellmls.getImages(id=cellmlId):
+                imagePath = os.path.join(CURRENT_PATH, WORKSPACE_DIR, os.path.dirname(self.sysCellmls.getPath(id=cellmlId)),self.sysImages.getPath(imageId))
+                if os.path.exists(imagePath):
+                    cellmlImages += [os.path.join(os.path.dirname(varData['cellmlUrl']),self.sysImages.getPath(imageId))]
+            # get cellml images from other cellml / workspaces if not found
+            if len(cellmlImages) == 0:
+                for similarCellml in similarCellmls:
+                    for imageId in self.sysCellmls.getImages(url=similarCellml):
+                        imagePath = os.path.join(CURRENT_PATH, WORKSPACE_DIR, os.path.dirname(self.sysCellmls.getPath(url=similarCellml)),self.sysImages.getPath(imageId))
+                        if os.path.exists(imagePath):
+                            cellmlImages += [os.path.join(os.path.dirname(PMR_SERVER + similarCellml),self.sysImages.getPath(imageId))]
+            varData['cellmlImages'] = cellmlImages
+
             resultVars[varId] = varData
 
         return resultVars
 
-    def __sedmlSearch(self, query, top):
+    def __searchSedmls(self, query, top):
         def getVarDataForPlot(varId):
             varData = {}
             varData['name'] = self.sysVars.getName(varId)
             varData['init'] = self.sysVars.getInit(varId)
             varData['type'] = self.sysVars.getType(varId)
+            if varData['type'] == 'state':
+                varData['rate'] = self.sysVars.getRate(varId)
             varUnit = self.sysVars.getUnit(varId)
             varData['unit'] = {'name': self.sysUnits.getNames(varUnit)[0], 'text':self.sysUnits.getText(varUnit)}
             varData['math'] = self.sysVars.getMaths(varId)
@@ -122,9 +159,30 @@ class Searcher:
                         resultPlots[plot]['workspaceUrl'] = PMR_SERVER+self.sysSedmls.getWorkspace(sedmlId)
                         cellmlId = self.sysSedmls.getCellmlId(sedmlId)
                         resultPlots[plot]['cellmlUrl'] = PMR_SERVER + self.sysCellmls.getUrl(id=cellmlId)
+                        # get exposures
+                        exposures = self.sysWks.getExposures(url=self.sysCellmls.getWorkspace(id=cellmlId))
+                        resultPlots[plot]['exposures'] = [PMR_SERVER + exposure for exposure in exposures.keys()]
+                        # get similar cellml using cluster
+                        similarCellmls = self.clusterer.getSimCellmlsByCluster(self.sysCellmls.getUrl(id=cellmlId)).keys()
+                        resultPlots[plot]['similarCellmls'] = [PMR_SERVER + url for url in similarCellmls]
+
                         # get cellml images
                         cellmlImages = []
                         for imageId in self.sysCellmls.getImages(id=cellmlId):
-                            cellmlImages += [os.path.join(os.path.dirname(resultPlots[plot]['cellmlUrl']),self.sysImages.getPath(imageId))]
+                            imagePath = os.path.join(CURRENT_PATH, WORKSPACE_DIR, os.path.dirname(self.sysCellmls.getPath(id=cellmlId)),self.sysImages.getPath(imageId))
+                            if os.path.exists(imagePath):
+                                cellmlImages += [os.path.join(os.path.dirname(resultPlots[plot]['cellmlUrl']),self.sysImages.getPath(imageId))]
+                        # get cellml images from other cellml / workspaces if not found
+                        if len(cellmlImages) == 0:
+                            for similarCellml in similarCellmls:
+                                for imageId in self.sysCellmls.getImages(url=similarCellml):
+                                    imagePath = os.path.join(CURRENT_PATH, WORKSPACE_DIR, os.path.dirname(self.sysCellmls.getPath(url=similarCellml)),self.sysImages.getPath(imageId))
+                                    if os.path.exists(imagePath):
+                                        cellmlImages += [os.path.join(os.path.dirname(PMR_SERVER + similarCellml),self.sysImages.getPath(imageId))]
                         resultPlots[plot]['cellmlImages'] = cellmlImages
+
         return resultPlots
+
+    def __getOtherCellms(cellmlId):
+        url = self.sysCellmls.getUrl(id=cellmlId)
+        similarCellmls = self.clusterer.getSimCellmlsByCluster(url).keys()

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 
 from ..general import *
 from .pmrcollection import PmrCollection
+import opencor as oc
 
 class Sedmls(PmrCollection):
     def __init__(self, *paths):
@@ -42,15 +43,17 @@ class Sedmls(PmrCollection):
 
     def validate(self):
         for k, v in self.data.items():
-            path = os.path.join(CURRENT_PATH, WORSPACE_DIR, v['workingDir'],v['sedml'])
-            isValid, issues = self.__isValid(path)
-            if not isValid:
-                v['status'] = self.statusC['invalid']
-            for i in range(len(issues)):
-                if issues[i].startswith('Error: the imports could not be fully instantiated'):
-                    issues[i] = re.sub(os.path.join(CURRENT_PATH, WORSPACE_DIR, v['workingDir'])+'/','',issues[i])
-            v['issues'] = issues
-
+            if v['status'] in [self.statusC['validating'], self.statusC['invalid']]:
+                path = os.path.join(CURRENT_PATH, WORKSPACE_DIR, v['workingDir'],v['sedml'])
+                isValid, issues = self.__isValid(path)
+                if not isValid:
+                    v['status'] = self.statusC['invalid']
+                else:
+                    v['status'] = self.statusC['validating']
+                for i in range(len(issues)):
+                    if issues[i].startswith('Error: the imports could not be fully instantiated'):
+                        issues[i] = re.sub(os.path.join(CURRENT_PATH, WORKSPACE_DIR, v['workingDir'])+'/','',issues[i])
+                v['issues'] = issues
         self.dumpJson()
 
     def __isValid(self, path):
@@ -194,10 +197,11 @@ class Sedmls(PmrCollection):
         # save simulation result to file
         if len(results) > 0:
             dumpPickle(results, RESOURCE_DIR, 'sedmlResults', str(v['id']) + '.gz')
-            # generate image plot
+
         # modify sedml dictionary
+        initVars = {k:v[0] for k,v in results.items()}
         v['status'] = self.statusC['current']
-        v['simulations'], v['models'], v['tasks'], v['variables'], v['outputs'] = simulations, models, tasks, list(results.keys()), outputs
+        v['simulations'], v['models'], v['tasks'], v['variables'], v['outputs'] = simulations, models, tasks, initVars, outputs
         # generate plot images:
         self.__generatePlotImages(v['id'], results, outputs)
         oc.close_simulation(sim)
