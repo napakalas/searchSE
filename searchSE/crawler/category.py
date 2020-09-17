@@ -1,7 +1,7 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..general import getUrlFromPmr, PMR_SERVER, RESOURCE_DIR, RS_VIEW
+from ..colls.category import Categories
 
-class Categories(PmrCollection):
+class Categories(Categories):
     def __init__(self, *paths):
         super().__init__(*paths)
 
@@ -38,5 +38,4 @@ class Categories(PmrCollection):
         views.dumpJson()
 
     def extract(self):
-
         self.dumpJson()

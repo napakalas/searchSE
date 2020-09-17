@@ -1,7 +1,6 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..colls.component import Components
 
-class Components(PmrCollection):
+class Components(Components):
     def __init__(self, *paths):
         super().__init__(*paths)
 
@@ -40,12 +39,6 @@ class Components(PmrCollection):
         else:
             self.data[compId]['variables'] = [varId]
 
-    def getT2Id(self, ids=None):
-        if isinstance(ids,list):
-            return {self.data[id]['name']:id for id in ids}
-        return {}
-        # return {v['name']:k for k,v in self.data.items()}
-
     def setVarRef(self, compId, varId, varName):
         if 'varRefs' not in self.data[compId]:
             self.data[compId]['varRefs'] = {}
@@ -53,17 +46,3 @@ class Components(PmrCollection):
 
     def setCellml(self, compId, cellmlId):
         self.data[compId]['cellml'] = cellmlId
-
-    def getVariables(self, compId):
-        if 'variables' in self.data[compId]:
-            return self.data[compId]['variables']
-        else:
-            # some components such as parent components may not have variables
-            # but they have children components which may have variable
-            return []
-
-    def getName(self,compId):
-        return self.data[compId]['name']
-
-    def getCellml(self, id):
-        return self.data[id]['cellml']

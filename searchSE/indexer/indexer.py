@@ -3,9 +3,9 @@ from ..general import RS_VARIABLE, RS_CELLML
 from ..general import loadJson, dumpJson, saveToFlatFile, getAllFilesInDir
 from ..general import loadFromFlatFile, saveBinaryInteger, loadBinaryInteger
 from ..general import loadPickle, dumpPickle, regexTokeniser, getTokens
-from ..crawler.variable import Variables
-from ..crawler.cellml import Cellmls
-from ..crawler.equation import Maths
+from ..colls.variable import Variables
+from ..colls.cellml import Cellmls
+from ..colls.equation import Maths
 
 from .clusterer import CellmlClusterer
 

@@ -1,7 +1,6 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..colls.view import Views
 
-class Views(PmrCollection):
+class Views(Views):
     def __init__(self, *paths):
         super().__init__(*paths)
 
@@ -15,5 +14,4 @@ class Views(PmrCollection):
         self.data[txtView]['rel'] = rel
 
     def extract(self):
-
         self.dumpJson()

@@ -7,6 +7,9 @@ from .sedml import Sedmls
 from .exposure import Exposures
 from .category import Categories
 from .view import Views
+from .unit import Units
+from .component import Components
+from .image import Images
 
 
 class Crawler():
@@ -17,7 +20,10 @@ class Crawler():
         self.sedmls = Sedmls(RESOURCE_DIR, RS_SEDML)
         self.sysMaths = Maths(RESOURCE_DIR, RS_MATH)
         self.sysVars = Variables(self.sysMaths,RESOURCE_DIR, RS_VARIABLE)
-        self.cellmls = Cellmls(self.workspaces, self.sedmls, self.sysVars, self.sysMaths, RESOURCE_DIR, RS_CELLML)
+        self.sysUnits = Units(RESOURCE_DIR, RS_UNIT)
+        self.sysComps = Components(RESOURCE_DIR, RS_COMPONENT)
+        self.sysImages = Images(RESOURCE_DIR, RS_IMAGE)
+        self.cellmls = Cellmls(self.workspaces, self.sedmls, self.sysImages, self.sysComps, self.sysVars, self.sysUnits, self.sysMaths, RESOURCE_DIR, RS_CELLML)
 
     def update(self):
         self.workspaces.update()
@@ -39,7 +45,6 @@ class Crawler():
         self.sedmls.extract(self.cellmls, self.sysVars)
         self.workspaces.extract(self.cellmls)
         self.exposures.extract()
-        pass
 
     def load(self):
         pass

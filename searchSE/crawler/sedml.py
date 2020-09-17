@@ -1,14 +1,12 @@
 import matplotlib.pyplot as plt
-
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..general import CURRENT_PATH, WORKSPACE_DIR, RESOURCE_DIR
+from ..colls.sedml import Sedmls
 import opencor as oc
+import os
 
-class Sedmls(PmrCollection):
+class Sedmls(Sedmls):
     def __init__(self, *paths):
         super().__init__(*paths)
-        self.statusC = {'deprecated': 0, 'current': 1, 'validating': 2, 'invalid': 3}
-        self.id2Url = {v['id']:k for k, v in self.data.items()}
 
     def add(self, file, wksDir, wks, workingDir):
         url = wks + '/rawfile/HEAD/' + file[len(wksDir) + 1:]
@@ -17,29 +15,6 @@ class Sedmls(PmrCollection):
             self.data[url] = {'id':newId,'sedml': file[len(wksDir) + 1:], 'workspace': wks, 'workingDir': workingDir}
             self.id2Url[newId] = url
         self.data[url]['status'] = self.statusC['validating']
-
-    def getUrl(self, id):
-        return self.id2Url[id] if id in self.id2Url else None
-
-    def getVariables(self, id, plot=None):
-        url = self.getUrl(id)
-        variables = set()
-        if plot == None:
-            return self.data[url]['variables']
-        else:
-            series = self.data[url]['outputs'][plot]
-            for seri in series:
-                variables.add(seri['x'])
-                variables.add(seri['y'])
-        return list(variables)
-
-    def getWorkspace(self, id):
-        url = self.getUrl(id)
-        return self.data[url]['workspace']
-
-    def getCellmlId(self, id):
-        url = self.getUrl(id)
-        return self.data[url]['models']['model']
 
     def validate(self):
         for k, v in self.data.items():

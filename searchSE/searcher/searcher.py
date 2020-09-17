@@ -1,15 +1,15 @@
 from .indexVariable import IndexVariable
 from ..general import *
-from ..crawler.unit import  Units
-from ..crawler.equation import Maths
-from ..crawler.variable import Variables
-from ..crawler.cellml import Cellmls
-from ..crawler.sedml import Sedmls
-from ..crawler.workspace import Workspaces
-from ..crawler.component import Components
-from ..crawler.image import Images
-
+from ..colls.unit import  Units
+from ..colls.equation import Maths
+from ..colls.variable import Variables
+from ..colls.cellml import Cellmls
+from ..colls.sedml import Sedmls
+from ..colls.workspace import Workspaces
+from ..colls.component import Components
+from ..colls.image import Images
 from ..indexer.indexer import RS_CLUSTERER
+import os
 
 class Searcher:
     def __init__(self, algorithm=ALG_BM25, idxVarFile='invIdxVar-obo-lemma-low'):
@@ -46,7 +46,7 @@ class Searcher:
         self.sysVars = Variables(self.sysMaths, RESOURCE_DIR, RS_VARIABLE)
         self.sysComps = Components(RESOURCE_DIR, RS_COMPONENT)
         self.sysWks = Workspaces(RESOURCE_DIR, RS_WORKSPACE)
-        self.sysCellmls = Cellmls(self.sysWks, self.sysSedmls, self.sysVars, self.sysMaths, RESOURCE_DIR, RS_CELLML)
+        self.sysCellmls = Cellmls(RESOURCE_DIR, RS_CELLML)
         self.sysImages = Images(RESOURCE_DIR, RS_IMAGE)
 
     def search(self, query, top=20):

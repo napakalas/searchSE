@@ -1,7 +1,6 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..colls.equation import Maths
 
-class Maths(PmrCollection):
+class Maths(Maths):
     def __init__(self, *paths):
         super().__init__(*paths)
 
@@ -9,6 +8,3 @@ class Maths(PmrCollection):
         mathId = self.getNewId()
         self.data[mathId] = text
         return mathId
-
-    def getText(self, id):
-        return self.data[id]

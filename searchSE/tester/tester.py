@@ -1,8 +1,5 @@
 from ..searcher.searcher import Searcher
 from ..general import ALG_BM25, m_c2p, TO_JUPYTER
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import matplotlib as mpl
 from py_asciimath.translator.translator import MathML2Tex
 from IPython.display import HTML, Markdown, display
 import logging

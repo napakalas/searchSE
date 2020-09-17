@@ -1,11 +1,12 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..general import getJsonFromPmr, getAllFilesInDir
+from ..general import PMR_SERVER, CURRENT_PATH, WORKSPACE_DIR, RESOURCE_DIR
+from ..colls.workspace import Workspaces
+import git
+import os
 
-class Workspaces(PmrCollection):
+class Workspaces(Workspaces):
     def __init__(self, *paths):
         super().__init__(*paths)
-        self.statusC = {'deprecated': 0, 'current': 1, 'validating': 2}
-        self.allWksDir = os.path.join(CURRENT_PATH,WORKSPACE_DIR)
 
     def update(self):
         # get or update workspaces
@@ -28,15 +29,6 @@ class Workspaces(PmrCollection):
         # save Workspaces
         self.dumpJson()
         self.__updateRdf()
-
-    # get list of workspaces URL in the PMR
-    def getListWorkspaces(self, fromServer=False):
-        if fromServer:
-            listWorkspaces = getUrlFromPmr(PMR_SERVER + 'workspace')
-            tmp = [url[url.find('.org/') + 5:] for url in listWorkspaces]
-            return tmp
-        else:
-            return list(self.data.keys())
 
     # synchronising workspace in local
     def __synchroWorkspace(self, url):
@@ -127,19 +119,6 @@ class Workspaces(PmrCollection):
                     pass
         dumpPickle(graph,CURRENT_PATH,RESOURCE_DIR,'rdf.graph')
 
-    def getCellml(self, id=None, url=None):
-        if id != None:
-            url = self.getUrl(id)
-        if url in self.data:
-            if 'cellml' in self.data[url]:
-                return self.data[url]['cellml']
-        return []
-
-    def getUrl(self, id):
-        if id in self.id2Url:
-            return self.id2Url[id]
-        return None
-
     def addCellml(self, id=None, url=None, cellmlId=None):
         if id != None:
             url = self.getUrl(id)
@@ -154,11 +133,3 @@ class Workspaces(PmrCollection):
         for cellmlId, data in sysCellmls.getData().items():
             self.addCellml(url=data['workspace'],cellmlId=data['id'])
         self.dumpJson()
-
-    def getExposures(self, id=None, url=None):
-        if id != None:
-            url = self.getUrl(id)
-        if url in self.data:
-            if 'exposures' in self.data[url]:
-                return self.data[url]['exposures']
-        return {}

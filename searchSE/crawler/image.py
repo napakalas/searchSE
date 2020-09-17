@@ -1,7 +1,6 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..colls.image import Images
 
-class Images(PmrCollection):
+class Images(Images):
     def __init__(self, *paths):
         super().__init__(*paths)
 

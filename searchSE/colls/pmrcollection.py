@@ -1,5 +1,6 @@
-from ..general import *
+from ..general import loadJson, dumpJson
 import copy
+import os
 
 class PmrCollection:
     def __init__(self, *paths):
@@ -41,8 +42,6 @@ class PmrCollection:
                     retObj[item] = self.data[id][item]
 
         return retObj
-
-
 
     def getObjLeaves(self, id):
         if id in self.data:

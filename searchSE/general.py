@@ -1,12 +1,10 @@
 import json
-import os, os.path
+import os
 import requests
 from lxml import etree
 import pickle
 import gzip
 import io
-import git
-from git import Repo
 import gc
 from tellurium.utils import omex
 import pandas as pd
@@ -43,6 +41,7 @@ RS_UNIT = 'listOfUnit.json'
 RS_VARIABLE = 'listOfVariable.json'
 RS_VIEW = 'listOfView.json'
 RS_WORKSPACE = 'listOfWorkspace.json'
+RS_XSL = 'ctopff.xsl'
 
 IMG_EXT = '.png'
 
@@ -212,7 +211,8 @@ def m_c2p(math_c, destination=TO_WEB):
     if '<math ' not in math_c:
         math_c = '<math xmlns="http://www.w3.org/1998/Math/MathML">' + math_c + '</math>'
     mml_dom = etree.fromstring(math_c)
-    xslt = etree.parse('ctopff.xsl')
+    xslPath = os.path.join(CURRENT_PATH, RESOURCE_DIR, RS_XSL)
+    xslt = etree.parse(xslPath)
     transform = etree.XSLT(xslt)
     mmldom = transform(mml_dom)
     root = mmldom.getroot()

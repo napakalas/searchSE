@@ -1,20 +1,9 @@
-from ..general import *
-from .pmrcollection import PmrCollection
+from ..general import getJsonFromPmr
+from ..colls.exposure import Exposures
 
-class Exposures(PmrCollection):
+class Exposures(Exposures):
     def __init__(self, workspaces, *paths):
-        super().__init__(*paths)
-        self.workspaces = workspaces
-        self.wksData = workspaces.getJson()['data']
-        self.statusC = {'deprecated': 0, 'current': 1, 'validating': 2}
-
-    def getListExposures(self, fromServer=False):
-        if fromServer:
-            listExposure = getUrlFromPmr(PMR_SERVER + 'exposure')
-            tmp = [url[url.find('.org/') + 5:] for url in listExposure]
-            return tmp
-        else:
-            return list(self.data.keys())
+        super().__init__(workspaces, *paths)
 
     # update local exposures,
     def update(self):
@@ -73,5 +62,4 @@ class Exposures(PmrCollection):
         self.dumpJson()
 
     def extract(self):
-
         self.dumpJson()
