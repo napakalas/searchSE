@@ -23,8 +23,9 @@ class Tester:
         if not os.path.exists(self.cacheDir):
             os.makedirs(self.cacheDir)
 
-    def searchSedmls(self, query):
-        result = self.searcher.search(query, top=1000)
+    def searchSedmls(self, query, top=2000, verbose=False):
+        result = self.searcher.search(query, top=top)
+        html=''
         for rs, val in result.items():
             header = 'SEDML: <a href="%s">%s</a> <br>'%(val['url'],val['url'])
             content = ''
@@ -63,7 +64,11 @@ class Tester:
 
             # replace value in html template
             replacer = {'header':header, 'content':content}
-            display(HTML(self.viewTemplate.substitute(replacer)))
+            html += self.viewTemplate.substitute(replacer)
+        if verbose:
+            display(HTML(html))
+        else:
+            return html
 
     def __printMath(self, varData):
         def getVarMd(varData):
@@ -91,9 +96,9 @@ class Tester:
         varMd = getVarMd(varData)
         return varMd
 
-    def searchVariables(self, query, top=20):
+    def searchVariables(self, query, top=20, verbose=False):
         result = self.searcher._Searcher__getVariables(query, top=top)
-
+        html = ''
         for rs, val in result.items():
             header = '; '.join(['<b>name:</b> %s'%val['name'], '<b>type:</b> %s'%val['type'], '<b>init:</b> %s'%val['init']])
             if 'rate' in val:
@@ -125,4 +130,8 @@ class Tester:
             content += '<hr style="height:1px;border:none;color:#333;background-color:#333;" />'
 
             replacer = {'header':header, 'content':content}
-            display(HTML(self.viewTemplate.substitute(replacer)))
+            html += self.viewTemplate.substitute(replacer)
+        if verbose:
+            display(HTML(html))
+        else:
+            return html
