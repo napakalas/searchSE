@@ -217,11 +217,11 @@ ENV/
 # exclude everything
 searchSE/workspaces/*
 searchSE/ontologies/*
-searchSE/resources/sedmlImages/*
+#searchSE/resources/sedmlImages/*
 searchSE/resources/sedmlResults/*
 
 # exception to the rule
-!searchSE/resources/sedmlImages/.gitkeep
+#!searchSE/resources/sedmlImages/.gitkeep
 !searchSE/resources/sedmlResults/.gitkeep
 !searchSE/workspaces/.gitkeep
 !searchSE/ontologies/.gitkeep
