@@ -14,6 +14,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["*.crawler", ".indexer"]),
     install_requires=[
         'requests',
+        'nltk',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
