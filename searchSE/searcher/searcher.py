@@ -34,11 +34,8 @@ class Searcher:
             a list of strings used that are the header columns
         """
         self.algorithm = algorithm
-
         self.idxVar = IndexVariable(idxVarFile)
-
         self.clusterer = loadPickle(RESOURCE_DIR, RS_CLUSTERER)
-
         self.sysUnits = Units(RESOURCE_DIR, RS_UNIT)
         self.sysMaths = Maths(RESOURCE_DIR, RS_MATH)
         self.sysSedmls = Sedmls(RESOURCE_DIR, RS_SEDML)

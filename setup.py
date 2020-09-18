@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/napakalas/searchSE",
-    packages=setuptools.find_packages(exclude=["*.crawler", "*.indexer"]),
+    packages=setuptools.find_packages(exclude=["*.crawler"]),
     install_requires=[
         'requests',
         'nltk',
@@ -21,6 +21,9 @@ setuptools.setup(
         'py_asciimath',
         'ipython',
         'beautifulsoup4',
+        'sklearn',
+        'hdbscan',
+        'numpy',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
