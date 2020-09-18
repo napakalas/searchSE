@@ -8,7 +8,6 @@ from ..colls.sedml import Sedmls
 from ..colls.workspace import Workspaces
 from ..colls.component import Components
 from ..colls.image import Images
-from ..indexer.indexer import RS_CLUSTERER
 import os
 
 class Searcher:

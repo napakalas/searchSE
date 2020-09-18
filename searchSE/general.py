@@ -32,6 +32,8 @@ RS_VARIABLE = 'listOfVariable.json'
 RS_VIEW = 'listOfView.json'
 RS_WORKSPACE = 'listOfWorkspace.json'
 RS_XSL = 'ctopff.xsl'
+RS_CLUSTERER = 'cellmlClusterer'
+RS_ONTOLOGY = 'ontoDf.gz'
 
 IMG_EXT = '.png'
 
