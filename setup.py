@@ -15,6 +15,7 @@ setuptools.setup(
     install_requires=[
         'requests',
         'nltk',
+        'lxml',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
