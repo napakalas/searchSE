@@ -3,6 +3,9 @@ from ..general import CURRENT_PATH, WORKSPACE_DIR, RESOURCE_DIR
 from ..colls.sedml import Sedmls
 import opencor as oc
 import os
+from lxml import etree
+from tellurium.utils import omex
+import re
 
 class Sedmls(Sedmls):
     def __init__(self, *paths):

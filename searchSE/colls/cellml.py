@@ -2,6 +2,8 @@ from ..general import loadPickle
 from ..general import CURRENT_PATH,RESOURCE_DIR, WORKSPACE_DIR
 from .pmrcollection import PmrCollection
 import os
+from lxml import etree
+import rdflib
 
 class Cellmls(PmrCollection):
     def __init__(self, *paths):

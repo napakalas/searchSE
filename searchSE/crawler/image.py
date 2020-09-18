@@ -1,4 +1,5 @@
 from ..colls.image import Images
+import re
 
 class Images(Images):
     def __init__(self, *paths):

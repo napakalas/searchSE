@@ -3,6 +3,11 @@ from ..general import CURRENT_PATH, WORKSPACE_DIR
 from ..colls.cellml import Cellmls
 import opencor as oc
 import os
+import rdflib
+import xmltodict
+from lxml import etree
+from tellurium.utils import omex
+import re
 
 class Cellmls(Cellmls):
     def __init__(self, sysWks, sysSedmls, sysImages, sysComps, sysVars, sysUnits, sysMaths, *paths):

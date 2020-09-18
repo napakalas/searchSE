@@ -1,22 +1,13 @@
 import json
 import os
 import requests
-from lxml import etree
 import pickle
 import gzip
 import io
-import gc
-from tellurium.utils import omex
-import pandas as pd
-import re
-import rdflib
-import xmltodict
-import sys
-import shutil
 import urllib.parse as urilib
-import urllib
 from nltk.stem import PorterStemmer, LancasterStemmer, WordNetLemmatizer
 from nltk import pos_tag, regexp_tokenize
+from lxml import etree
 
 """init global variable"""
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))  # use this on real python

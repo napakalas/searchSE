@@ -3,6 +3,8 @@ from ..general import PMR_SERVER, CURRENT_PATH, WORKSPACE_DIR, RESOURCE_DIR
 from ..colls.workspace import Workspaces
 import git
 import os
+import rdflib
+import shutil
 
 class Workspaces(Workspaces):
     def __init__(self, *paths):

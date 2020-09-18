@@ -20,7 +20,6 @@ setuptools.setup(
         'lxml',
         'requests',
         'GitPython',
-        'pydriller',
         'tellurium',
         'pandas',
         'rdflib',
