@@ -19,6 +19,7 @@ setuptools.setup(
         'urllib3',
         'rdflib',
         'py_asciimath',
+        'ipython',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
