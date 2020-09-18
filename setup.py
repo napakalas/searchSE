@@ -24,6 +24,7 @@ setuptools.setup(
         'sklearn',
         'hdbscan',
         'numpy',
+        'pandas',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
