@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/napakalas/searchSE",
-    packages=setuptools.find_packages(exclude=["*.crawler", ".indexer"]),
+    packages=setuptools.find_packages(exclude=["*.crawler", "*.indexer"]),
     install_requires=[
         'requests',
         'nltk',
