@@ -20,4 +20,5 @@ setuptools.setup(
          "License :: OSI Approved :: GNU General Public License (GPL)",
          "Operating System :: OS Independent",
         ],
+    package_data={'': ['resources/*','sedmlImages/*']},
     )
