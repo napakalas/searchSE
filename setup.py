@@ -20,6 +20,7 @@ setuptools.setup(
         'rdflib',
         'py_asciimath',
         'ipython',
+        'beautifulsoup4',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
