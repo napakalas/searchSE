@@ -4,7 +4,6 @@ import requests
 import pickle
 import gzip
 import io
-import urllib.parse as urilib
 from nltk.stem import PorterStemmer, LancasterStemmer, WordNetLemmatizer
 from nltk import pos_tag, regexp_tokenize
 from lxml import etree

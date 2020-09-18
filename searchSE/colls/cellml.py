@@ -4,6 +4,7 @@ from .pmrcollection import PmrCollection
 import os
 from lxml import etree
 import rdflib
+import urllib.parse as urilib
 
 class Cellmls(PmrCollection):
     def __init__(self, *paths):

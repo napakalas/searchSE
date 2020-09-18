@@ -16,6 +16,8 @@ setuptools.setup(
         'requests',
         'nltk',
         'lxml',
+        'urllib3',
+        'rdflib'
         ],
     classifiers=[
          "Programming Language :: Python :: 3",

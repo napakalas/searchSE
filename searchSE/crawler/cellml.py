@@ -8,6 +8,7 @@ import xmltodict
 from lxml import etree
 from tellurium.utils import omex
 import re
+import urllib.parse as urilib
 
 class Cellmls(Cellmls):
     def __init__(self, sysWks, sysSedmls, sysImages, sysComps, sysVars, sysUnits, sysMaths, *paths):
