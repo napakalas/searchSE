@@ -17,7 +17,8 @@ setuptools.setup(
         'nltk',
         'lxml',
         'urllib3',
-        'rdflib'
+        'rdflib',
+        'py_asciimath',
         ],
     classifiers=[
          "Programming Language :: Python :: 3",
