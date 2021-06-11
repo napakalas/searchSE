@@ -215,13 +215,13 @@ ENV/
 # End of https://www.gitignore.io/api/macos,linux,django,python,pycharm
 
 # exclude everything
-searchSE/workspaces/*
-searchSE/ontologies/*
-#searchSE/resources/sedmlImages/*
-searchSE/resources/sedmlResults/*
+bmse/*workspaces/*
+bmse/ontologies/*
+bmse/*resources/sedmlImages/*
+bmse/*resources/sedmlResults/*
 
 # exception to the rule
-#!searchSE/resources/sedmlImages/.gitkeep
-!searchSE/resources/sedmlResults/.gitkeep
-!searchSE/workspaces/.gitkeep
-!searchSE/ontologies/.gitkeep
+!bmse/*resources/sedmlImages/.gitkeep
+!bmse/*resources/sedmlResults/.gitkeep
+!bmse/*workspaces/.gitkeep
+!bmse/ontologies/.gitkeep
